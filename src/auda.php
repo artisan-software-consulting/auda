@@ -164,10 +164,11 @@ final class auda
 
         if (sizeof($names) === 0 or $keyPart === "") {
             if ($keyPart === "") {
-                echo "****TEST $data=".$data;
                 $data = $value;
             } else {
-                $data[$keyPart] = $value;
+                if (!isset($data[$keyPart]) || !$data[$keyPart]->isProtected()) {
+                    $data[$keyPart] = $value;
+                }
             }
         } else {
             // If the key does not exist in the array, initialize it as an empty array
