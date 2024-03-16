@@ -1,5 +1,13 @@
 {
+  "name": "artisan-software-consulting/auda",
   "autoload": {
-    "psr-4": {"Artisan-Software-Consulting\\": "src/"}
+    "psr-4": {
+      "ArtisanSoftwareConsulting\\": "src/"
+    }
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    }
   }
 }
