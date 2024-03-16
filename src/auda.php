@@ -21,7 +21,7 @@ namespace jaschiel;
 final class auda
 {
     private const TRIM_CHARACTERS = " ]";
-    private array $args;
+    private array $theAuda;
 
     public function __construct()
     {
@@ -30,24 +30,24 @@ final class auda
 
     public function getAll(): array
     {
-        return $this->args;
+        return $this->theAuda;
     }
 
     public function add(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
     {
-        $this->setNestedValue($this->args, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue));
+        $this->setNestedValue($this->theAuda, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue));
         return $this;
     }
 
     public function addProtected(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
     {
-        $this->setNestedValue($this->args, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue, true));
+        $this->setNestedValue($this->theAuda, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue, true));
         return $this;
     }
 
     public function addQuery(string $query): static
     {
-        parse_str($query, $this->args);
+        parse_str($query, $this->theAuda);
         return $this;
     }
 
@@ -72,7 +72,7 @@ final class auda
     }
 
     /**
-     * Injects the arguments fetched from the request body into the `$args` array if the content type is either "application/json" or "text/plain".
+     * Injects the arguments fetched from the request body into the `$theAuda` array if the content type is either "application/json" or "text/plain".
      * Modified the routine so that the last assignment to a specific key wins; older values are lost.
      *
      * @param string $contentType The content type of the request body
@@ -92,7 +92,7 @@ final class auda
     public function __toString(): string
     {
         $response = "AUDA=>";
-        foreach ($this->args as $name => $value) {
+        foreach ($this->theAuda as $name => $value) {
             if (is_string($value)) {
                 $response .= "{$name}={$value},";
             } else {
@@ -112,7 +112,7 @@ final class auda
             $parts[key($parts)] = rtrim(end($parts), '[]');
         }
 
-        $value = $this->args;
+        $value = $this->theAuda;
 
         foreach ($parts as $part) {
             if (isset($value[$part])) {
@@ -122,8 +122,12 @@ final class auda
             }
         }
 
-        /** @var audaValue $value */
-        return $value->getValue();
+        if (is_array($value)) {
+            return $this->flattenArray($value);
+        } else {
+            /** @var audaValue $value */
+            return $value->getValue();
+        }
     }
 
     /**
@@ -133,7 +137,7 @@ final class auda
      */
     public function clear(): void
     {
-        $this->args = [];
+        $this->theAuda = [];
     }
 
     /**
@@ -190,5 +194,24 @@ final class auda
             $value = str_replace('$$', '/', $value);
         }
         return new audaValue($protected, $value);
+    }
+
+    /**
+     * @param array $value
+     * @return array
+     * This routine converts arrays of audaValue objects into an array with only the user-anticipated values.
+     */
+    private function flattenArray(array $value): array
+    {
+        $result = [];
+        foreach ($value as $key => $val) {
+            if (is_array($val)) {
+                $result = array_merge($result, $this->flattenArray($val));
+            } else {
+                /** @var audaValue $val */
+                $result[$key] = $val->getValue();
+            }
+        }
+        return $result;
     }
 }
