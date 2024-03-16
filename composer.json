@@ -5,8 +5,6 @@
       "jaschiel\\auda\\": "src/"
     }
   },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
   "config": {
     "platform": {
       "php": "8.2"
