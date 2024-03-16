@@ -33,9 +33,9 @@ final class auda
         return $this->args;
     }
 
-    public function add(string $name, mixed $value, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
+    public function add(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
     {
-        $this->setNestedValue($this->args, $this->correctedName($toLower, $name), $this->correctedValue($convertDollarsToSlashes, $value));
+        $this->setNestedValue($this->args, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue));
         return $this;
     }
 
@@ -96,7 +96,7 @@ final class auda
         return $response;
     }
 
-    public function get($name, bool $toLower = true)
+    public function get($name, bool $toLower = true): mixed
     {
         $name = ($toLower) ? strtolower($name) : $name;
         $parts = explode('.', $name);
@@ -116,7 +116,8 @@ final class auda
             }
         }
 
-        return $value;
+        /** @var audaValue $value */
+        return $value->getValue();
     }
 
 
@@ -142,7 +143,7 @@ final class auda
      * @param mixed $value
      * @return void
      */
-    private function setNestedValue(array &$data, array $names, mixed $value): void
+    private function setNestedValue(array &$data, array $names, audaValue $value): void
     {
         $keyPart = $this->shiftAndTrim($names);
 
@@ -166,12 +167,12 @@ final class auda
         return trim(array_shift($array), self::TRIM_CHARACTERS);
     }
 
-    private function correctedValue(bool $convertDollarsToSlashes, mixed $value): mixed
+    private function preparedValue(bool $convertDollarsToSlashes, mixed $value): audaValue
     {
         if ($convertDollarsToSlashes && is_string($value)) {
             $value = str_replace('$$', '/', $value);
         }
-        return $value;
+        return new audaValue(false,$value);
     }
 
     /**
