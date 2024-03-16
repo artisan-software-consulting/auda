@@ -1,12 +1,25 @@
 {
   "name": "jaschiel/auda",
+  "type": "library",
+  "description": "A component for passing data between controllers in an MVC architecture",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jim Schiel",
+      "email": "jim@artisanagility.com",
+      "homepage": "https://artisanagility.com",
+      "role": "Developer"
+    }
+  ],
   "autoload": {
     "psr-4": {
-      "jaschiel\\auda\\": "src/"
+      "jaschiel\\auda\\": "src"
     }
   },
   "archive": {
-    "exclude": ["/.idea","composer.*"]
+    "exclude": [
+      "/composer.*"
+    ]
   },
   "config": {
     "platform": {
