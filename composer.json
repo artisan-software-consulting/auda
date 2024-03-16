@@ -2,9 +2,11 @@
   "name": "artisan-software-consulting/auda",
   "autoload": {
     "psr-4": {
-      "ArtisanSoftwareConsulting\\": "src/"
+      "jaschiel\\auda\\": "src/"
     }
   },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "config": {
     "platform": {
       "php": "8.2"
