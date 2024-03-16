@@ -39,6 +39,12 @@ final class auda
         return $this;
     }
 
+    public function addProtected(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
+    {
+        $this->setNestedValue($this->args, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue, true));
+        return $this;
+    }
+
     public function addQuery(string $query): static
     {
         parse_str($query, $this->args);
@@ -120,6 +126,15 @@ final class auda
         return $value->getValue();
     }
 
+    /**
+     * Clear the array of arguments.
+     *
+     * @return void
+     */
+    public function clear(): void
+    {
+        $this->args = [];
+    }
 
     /**
      *
@@ -149,12 +164,13 @@ final class auda
 
         if (sizeof($names) === 0 or $keyPart === "") {
             if ($keyPart === "") {
+                echo "****TEST $data=".$data;
                 $data = $value;
             } else {
                 $data[$keyPart] = $value;
             }
         } else {
-            // If the key does not exist in the array, initialise it as an empty array
+            // If the key does not exist in the array, initialize it as an empty array
             if (!isset($data[$keyPart])) {
                 $data[$keyPart] = [];
             }
@@ -167,21 +183,11 @@ final class auda
         return trim(array_shift($array), self::TRIM_CHARACTERS);
     }
 
-    private function preparedValue(bool $convertDollarsToSlashes, mixed $value): audaValue
+    private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false): audaValue
     {
         if ($convertDollarsToSlashes && is_string($value)) {
             $value = str_replace('$$', '/', $value);
         }
-        return new audaValue(false,$value);
-    }
-
-    /**
-     * Clear the array of arguments.
-     *
-     * @return void
-     */
-    public function clear(): void
-    {
-        $this->args = [];
+        return new audaValue($protected, $value);
     }
 }
