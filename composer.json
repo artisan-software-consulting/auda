@@ -5,6 +5,9 @@
       "jaschiel\\auda\\": "src/"
     }
   },
+  "archive": {
+    "exclude": ["/.idea","composer.*"]
+  },
   "config": {
     "platform": {
       "php": "8.2"
