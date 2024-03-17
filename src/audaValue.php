@@ -9,7 +9,7 @@ namespace jaschiel;
  * @name audaValue.php
  * @author
  * @copyright Artisan Software Consulting
- * @version
+ * @version 1.0.3
  * @package
  * @description
  */

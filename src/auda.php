@@ -10,10 +10,11 @@ namespace jaschiel;
  * @author James Schiel
  * @date March 8, 2024
  * @copyright Artisan Software Consulting
- * @version 1
+ * @version 1.0.7
  * @package
  * @description
  *
+ * 2024-Mar-17 - Schiel - bug fix in FlattenArray.
  * 2024-Mar-16 - Schiel - added a clear method (initially used in a redirect); moved into a separate directory; I want to try to keep
  *                   this functionality as independent of the sierra architecture as possible.
  * 2024-Mar-9 - Schiel - modified to convert "$$" in values to "/" since it is a security risk to accept encoded slashes in the URL.
@@ -206,7 +207,7 @@ final class auda
         $result = [];
         foreach ($value as $key => $val) {
             if (is_array($val)) {
-                $result = array_merge($result, $this->flattenArray($val));
+                $result[] = $this->flattenArray($val);
             } else {
                 /** @var audaValue $val */
                 $result[$key] = $val->getValue();
