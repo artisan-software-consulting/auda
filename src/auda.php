@@ -10,10 +10,11 @@ namespace jaschiel;
  * @author James Schiel
  * @date March 8, 2024
  * @copyright Artisan Software Consulting
- * @version 1.0.7
+ * @version 1
  * @package
  * @description
  *
+ * 2024-Mar-19 - Schiel - bug fix dealing with single dimension unnamed arrays.
  * 2024-Mar-17 - Schiel - bug fix in FlattenArray.
  * 2024-Mar-16 - Schiel - added a clear method (initially used in a redirect); moved into a separate directory; I want to try to keep
  *                   this functionality as independent of the sierra architecture as possible.
@@ -154,7 +155,7 @@ final class auda
      */
     private function correctedName(bool $toLower, string $name): array
     {
-        return explode("[", ($toLower) ? strtolower($name) : $name);
+        return preg_split('#(?=\[[^\]]*\])#', ($toLower) ? strtolower($name) : $name);
     }
 
     /**
@@ -165,11 +166,13 @@ final class auda
      */
     private function setNestedValue(array &$data, array $names, audaValue $value): void
     {
-        $keyPart = $this->shiftAndTrim($names);
+        $keyPart = array_shift($names);
 
-        if (sizeof($names) === 0 or $keyPart === "") {
+        if (sizeof($names) === 0 or $keyPart === "" or $keyPart === "[]") {
             if ($keyPart === "") {
                 $data = $value;
+            } else if ($keyPart === "[]") {
+                $data[] = $value;
             } else {
                 if (!isset($data[$keyPart]) || !$data[$keyPart]->isProtected()) {
                     $data[$keyPart] = $value;
@@ -182,11 +185,6 @@ final class auda
             }
             $this->setNestedValue($data[$keyPart], $names, $value);
         }
-    }
-
-    private function shiftAndTrim(array &$array): string
-    {
-        return trim(array_shift($array), self::TRIM_CHARACTERS);
     }
 
     private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false): audaValue
