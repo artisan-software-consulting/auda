@@ -3,7 +3,7 @@
  * Copyright (c) 2024. Artisan Software Consulting. All rights reserved.
  */
 
-namespace jaschiel;
+namespace auda;
 
 /**
  * @name audaValue.php
