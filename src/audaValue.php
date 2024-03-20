@@ -34,19 +34,21 @@ class audaValue
         return $this->protected;
     }
 
-    public function setProtected(bool $protected): void
+    public function setProtected(bool $protected): static
     {
         $this->protected = $protected;
+        return $this;
     }
 
-    public function getValue(): string
+    public function getValue(): mixed
     {
         return $this->value;
     }
 
-    public function setValue(string $value): void
+    public function setValue(mixed $value): static
     {
         $this->value = $value;
+        return $this;
     }
 
 }
