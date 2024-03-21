@@ -1,5 +1,5 @@
 {
-  "name": "jaschiel/auda",
+  "name": "artisan-software-consulting/auda",
   "type": "library",
   "description": "A component for passing data between controllers in an MVC architecture",
   "license": "MIT",
