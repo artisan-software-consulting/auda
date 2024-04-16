@@ -14,6 +14,7 @@ namespace auda;
  * @package
  * @description
  *
+ * 2024-Apr-16 - Schiel - bug fix dealing with the array brackets being used as part of the key.
  * 2024-Mar-19 - Schiel - bug fix dealing with single dimension unnamed arrays.
  * 2024-Mar-17 - Schiel - bug fix in FlattenArray.
  * 2024-Mar-16 - Schiel - added a clear method (initially used in a redirect); moved into a separate directory; I want to try to keep
@@ -175,6 +176,10 @@ final class auda
                 $data[] = $value;
             } else {
                 if (!isset($data[$keyPart]) || !$data[$keyPart]->isProtected()) {
+                    // modification to remove array brackets when used as a key
+                    if (str_starts_with($keyPart,"[") && str_ends_with($keyPart,"]")) {
+                        $keyPart = substr($keyPart, 1, -1);
+                    }
                     $data[$keyPart] = $value;
                 }
             }
