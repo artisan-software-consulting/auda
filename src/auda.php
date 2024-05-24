@@ -41,6 +41,12 @@ final class auda
         return $this;
     }
 
+    public function addFile(string $name, mixed $rawValue, string $tempName): auda
+    {
+        $this->setNestedValue($this->theAuda, $this->$name, $this->preparedValue(false,$rawValue,false, $tempName));
+        return $this;
+    }
+
     public function addProtected(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
     {
         $this->setNestedValue($this->theAuda, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue, true));
@@ -83,10 +89,18 @@ final class auda
      */
     public function addFetch(string $contentType, bool $toLower = true): void
     {
-        if ($contentType == "application/json" || $contentType == "text/plain") {
+        $contentTypePart = substr($contentType,0,strpos($contentType,";")-1);
+        if ($contentTypePart == "application/json" || $contentTypePart == "text/plain" || $contentTypePart == "multipart/form-data") {
             $jsonArgs = $this->receiveRAWJsonData();
             foreach ($jsonArgs as $key => $value) {
                 $this->add($key, $value, $toLower);
+            }
+        }
+        if ($contentTypePart == "multipart/form-data") {
+            if (isset($_FILES)) {
+                foreach($_FILES as $file) {
+                    $this->addFile($file["name"],$file["full_path"],$file["tmp_name"]);
+                }
             }
         }
     }
@@ -187,12 +201,16 @@ final class auda
         }
     }
 
-    private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false): audaValue
+    private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false, ?string $tempFileName = null): audaValue
     {
         if ($convertDollarsToSlashes && is_string($value)) {
             $value = str_replace('$$', '/', $value);
         }
-        return new audaValue($protected, $value);
+        $theValue = new audaValue($protected, $value);
+        if ($tempFileName) {
+            $theValue->setFileTempName($tempFileName);
+        }
+        return $theValue;
     }
 
     /**
