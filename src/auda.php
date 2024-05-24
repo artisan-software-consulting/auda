@@ -99,8 +99,8 @@ final class auda
         }
         if ($contentTypePart == "multipart/form-data") {
             if (isset($_FILES)) {
-                foreach($_FILES as $file) {
-                    $this->addFile($file["name"],$file["full_path"],$file["tmp_name"]);
+                foreach($_FILES as $name=>$file) {
+                    $this->addFile($name,$file["full_path"],$file["tmp_name"]);
                 }
             }
         }
