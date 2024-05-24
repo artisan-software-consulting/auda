@@ -44,7 +44,7 @@ final class auda
 
     public function addFile(string $name, mixed $rawValue, string $tempName): auda
     {
-        $this->setNestedValue($this->theAuda, $this->correctedName(false, $name), $this->preparedValue(false,$rawValue,false, $tempName));
+        $this->setNestedValue($this->theAuda, $this->correctedName(false, $name), $this->preparedValue(false, $rawValue, false, $tempName));
         return $this;
     }
 
@@ -90,7 +90,7 @@ final class auda
      */
     public function addFetch(string $contentType, bool $toLower = true): void
     {
-        $contentTypePart = substr($contentType,0,strpos($contentType,";"));
+        $contentTypePart = substr($contentType, 0, strpos($contentType, ";"));
         if ($contentTypePart == "application/json" || $contentTypePart == "text/plain" || $contentTypePart == "multipart/form-data") {
             $jsonArgs = $this->receiveRAWJsonData();
             foreach ($jsonArgs as $key => $value) {
@@ -99,8 +99,8 @@ final class auda
         }
         if ($contentTypePart == "multipart/form-data") {
             if (isset($_FILES)) {
-                foreach($_FILES as $name=>$file) {
-                    $this->addFile($name,$file["full_path"],$file["tmp_name"]);
+                foreach ($_FILES as $name => $file) {
+                    $this->addFile($name, $file["full_path"], $file["tmp_name"]);
                 }
             }
         }
@@ -147,6 +147,28 @@ final class auda
         }
     }
 
+    public function getElement($name, bool $toLower = true): mixed
+    {
+        $name = ($toLower) ? strtolower($name) : $name;
+        $parts = explode('.', $name);
+
+        // If the name concludes with "[]", an array is requested
+        if (preg_match('/\[\]$/', end($parts))) {
+            $parts[key($parts)] = rtrim(end($parts), '[]');
+        }
+
+        $value = $this->theAuda;
+
+        foreach ($parts as $part) {
+            if (isset($value[$part])) {
+                $value = $value[$part];
+            } else {
+                return null; // The value doesn't exist
+            }
+        }
+        return $value;
+    }
+
     /**
      * Clear the array of arguments.
      *
@@ -191,7 +213,7 @@ final class auda
             } else {
                 if (!isset($data[$keyPart]) || !$data[$keyPart]->isProtected()) {
                     // modification to remove array brackets when used as a key
-                    if (str_starts_with($keyPart,"[") && str_ends_with($keyPart,"]")) {
+                    if (str_starts_with($keyPart, "[") && str_ends_with($keyPart, "]")) {
                         $keyPart = substr($keyPart, 1, -1);
                     }
                     $data[$keyPart] = $value;
