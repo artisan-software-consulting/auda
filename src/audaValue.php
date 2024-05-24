@@ -30,6 +30,16 @@ class audaValue
         return $this->getValue();
     }
 
+    public function __get($name) {
+        switch ($name) {
+            case "tempname":
+                return $this->getFileTempName();
+                break;
+            default:
+                return $this->getValue();
+        }
+    }
+
     public function isProtected(): bool
     {
         return $this->protected;
