@@ -147,7 +147,7 @@ final class auda
         }
     }
 
-    public function getElement($name, bool $toLower = true): mixed
+    public function getElement($name, bool $toLower = true): ?audaValue
     {
         $name = ($toLower) ? strtolower($name) : $name;
         $parts = explode('.', $name);
