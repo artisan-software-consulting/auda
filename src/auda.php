@@ -90,7 +90,7 @@ final class auda
      */
     public function addFetch(string $contentType, bool $toLower = true): void
     {
-        $contentTypePart = substr($contentType,0,strpos($contentType,";")-1);
+        $contentTypePart = substr($contentType,0,strpos($contentType,";"));
         if ($contentTypePart == "application/json" || $contentTypePart == "text/plain" || $contentTypePart == "multipart/form-data") {
             $jsonArgs = $this->receiveRAWJsonData();
             foreach ($jsonArgs as $key => $value) {
