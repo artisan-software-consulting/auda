@@ -44,7 +44,7 @@ final class auda
 
     public function addFile(string $name, mixed $rawValue, string $tempName): auda
     {
-        $this->setNestedValue($this->theAuda, $this->$name, $this->preparedValue(false,$rawValue,false, $tempName));
+        $this->setNestedValue($this->theAuda, $name, $this->preparedValue(false,$rawValue,false, $tempName));
         return $this;
     }
 
