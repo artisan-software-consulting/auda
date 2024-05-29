@@ -56,7 +56,13 @@ final class auda
 
     public function addQuery(string $query): static
     {
-        parse_str($query, $this->theAuda);
+        $queryStringValues = [];
+        parse_str($query, $queryStringValues);
+
+        foreach($queryStringValues as $key => $value) {
+            $this->add($key, $value);
+        }
+
         return $this;
     }
 
