@@ -146,11 +146,17 @@ final class auda
         }
 
         if (is_array($value)) {
-            return $this->flattenArray($value);
+            $result =  $this->flattenArray($value);
         } else {
             /** @var audaValue $value */
-            return $value->getValue();
+            $result = $value->getValue();
         }
+
+        if (is_array($result) && sizeof($result) === 1 && is_array($result[0])) {
+            $result = $result[0];
+        }
+
+        return $result;
     }
 
     public function getElement($name, bool $toLower = true): ?audaValue
