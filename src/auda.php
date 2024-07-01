@@ -14,6 +14,7 @@ namespace auda;
  * @package
  * @description
  *
+ * 2024-Apr-16 - Schiel - bug fix dealing with the array brackets being used as part of the key.
  * 2024-Mar-19 - Schiel - bug fix dealing with single dimension unnamed arrays.
  * 2024-Mar-17 - Schiel - bug fix in FlattenArray.
  * 2024-Mar-16 - Schiel - added a clear method (initially used in a redirect); moved into a separate directory; I want to try to keep
@@ -41,6 +42,12 @@ final class auda
         return $this;
     }
 
+    public function addFile(string $name, mixed $rawValue, string $tempName): auda
+    {
+        $this->setNestedValue($this->theAuda, $this->correctedName(false, $name), $this->preparedValue(false, $rawValue, false, $tempName));
+        return $this;
+    }
+
     public function addProtected(string $name, mixed $rawValue, bool $toLower = true, bool $convertDollarsToSlashes = true): auda
     {
         $this->setNestedValue($this->theAuda, $this->correctedName($toLower, $name), $this->preparedValue($convertDollarsToSlashes, $rawValue, true));
@@ -49,7 +56,13 @@ final class auda
 
     public function addQuery(string $query): static
     {
-        parse_str($query, $this->theAuda);
+        $queryStringValues = [];
+        parse_str($query, $queryStringValues);
+
+        foreach($queryStringValues as $key => $value) {
+            $this->add($key, $value);
+        }
+
         return $this;
     }
 
@@ -83,10 +96,18 @@ final class auda
      */
     public function addFetch(string $contentType, bool $toLower = true): void
     {
-        if ($contentType == "application/json" || $contentType == "text/plain") {
+        $contentTypePart = substr($contentType, 0, strpos($contentType, ";"));
+        if (in_array($contentTypePart,["","application/json","text/plain","multipart/form-data"])) {
             $jsonArgs = $this->receiveRAWJsonData();
             foreach ($jsonArgs as $key => $value) {
                 $this->add($key, $value, $toLower);
+            }
+        }
+        if ($contentTypePart == "multipart/form-data") {
+            if (isset($_FILES)) {
+                foreach ($_FILES as $name => $file) {
+                    $this->addFile($name, $file["full_path"], $file["tmp_name"]);
+                }
             }
         }
     }
@@ -125,11 +146,39 @@ final class auda
         }
 
         if (is_array($value)) {
-            return $this->flattenArray($value);
+            $result =  $this->flattenArray($value);
         } else {
             /** @var audaValue $value */
-            return $value->getValue();
+            $result = $value->getValue();
         }
+
+        if (is_array($result) && sizeof($result) === 1 && is_array($result[0])) {
+            $result = $result[0];
+        }
+
+        return $result;
+    }
+
+    public function getElement($name, bool $toLower = true): ?audaValue
+    {
+        $name = ($toLower) ? strtolower($name) : $name;
+        $parts = explode('.', $name);
+
+        // If the name concludes with "[]", an array is requested
+        if (preg_match('/\[\]$/', end($parts))) {
+            $parts[key($parts)] = rtrim(end($parts), '[]');
+        }
+
+        $value = $this->theAuda;
+
+        foreach ($parts as $part) {
+            if (isset($value[$part])) {
+                $value = $value[$part];
+            } else {
+                return null; // The value doesn't exist
+            }
+        }
+        return $value;
     }
 
     /**
@@ -175,6 +224,10 @@ final class auda
                 $data[] = $value;
             } else {
                 if (!isset($data[$keyPart]) || !$data[$keyPart]->isProtected()) {
+                    // modification to remove array brackets when used as a key
+                    if (str_starts_with($keyPart, "[") && str_ends_with($keyPart, "]")) {
+                        $keyPart = substr($keyPart, 1, -1);
+                    }
                     $data[$keyPart] = $value;
                 }
             }
@@ -187,12 +240,16 @@ final class auda
         }
     }
 
-    private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false): audaValue
+    private function preparedValue(bool $convertDollarsToSlashes, mixed $value, bool $protected = false, ?string $tempFileName = null): audaValue
     {
         if ($convertDollarsToSlashes && is_string($value)) {
             $value = str_replace('$$', '/', $value);
         }
-        return new audaValue($protected, $value);
+        $theValue = new audaValue($protected, $value);
+        if ($tempFileName) {
+            $theValue->setFileTempName($tempFileName);
+        }
+        return $theValue;
     }
 
     /**

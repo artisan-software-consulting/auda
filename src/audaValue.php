@@ -17,6 +17,7 @@ class audaValue
 {
     private bool $protected;
     private mixed $value;
+    private string $temporary_file_name = "";
 
     public function __construct(bool $protected, mixed $value)
     {
@@ -27,6 +28,16 @@ class audaValue
     public function __toString(): string
     {
         return $this->getValue();
+    }
+
+    public function __get($name) {
+        switch ($name) {
+            case "tempname":
+                return $this->getFileTempName();
+                break;
+            default:
+                return $this->getValue();
+        }
     }
 
     public function isProtected(): bool
@@ -48,6 +59,17 @@ class audaValue
     public function setValue(mixed $value): static
     {
         $this->value = $value;
+        return $this;
+    }
+
+    public function getFileTempName(): string
+    {
+        return $this->temporary_file_name;
+    }
+
+    public function setFileTempName(string $name): static
+    {
+        $this->temporary_file_name = $name;
         return $this;
     }
 
