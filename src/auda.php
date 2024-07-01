@@ -266,8 +266,8 @@ final class auda
                 $result[$key] = $this->flattenArray($val);
             } else {
                 /** @var audaValue $val */
-//                $result[$key] = $val->getValue();
-                $result = $val->getValue();
+                $result[$key] = $val->getValue();
+//                $result = $val->getValue();
             }
         }
         return $result;
