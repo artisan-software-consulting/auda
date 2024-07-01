@@ -197,20 +197,37 @@ final class auda
 
     /**
      * @param array $value
-     * @return array
+     * @return array|string This routine converts arrays of audaValue objects into an array with only the user-anticipated values.
      * This routine converts arrays of audaValue objects into an array with only the user-anticipated values.
      */
-    private function flattenArray(array $value): array
+    private function flattenArray(array $value): array|string
     {
         $result = [];
         foreach ($value as $key => $val) {
             if (is_array($val)) {
-                $result[] = $this->flattenArray($val);
+                $key = $this->removeBracketsAroundKey($key);
+                $result[$key] = $this->flattenArray($val);
             } else {
                 /** @var audaValue $val */
-                $result[$key] = $val->getValue();
+//                $result[$key] = $val->getValue();
+                $result = $val->getValue();
             }
         }
         return $result;
+    }
+
+    /**
+     * @param int|string $key
+     * @return int|string
+     */
+    public function removeBracketsAroundKey(int|string $key): string|int
+    {
+        if (substr($key, 0, 1) === "[") {
+            $key = substr($key, 1);
+        }
+        if (substr($key, strlen($key) - 1, 1) === "]") {
+            $key = substr($key, 0, strlen($key) - 1);
+        }
+        return $key;
     }
 }
